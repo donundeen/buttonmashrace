@@ -1,9 +1,11 @@
 #include <Adafruit_NeoPixel.h>
 
-#define BUTTON_A_PIN 2      // Button A connected to digital pin 2
-#define BUTTON_B_PIN 3      // Button B connected to digital pin 3
-#define NEOPIXEL_PIN 6      // NeoPixel strip connected to digital pin 6
+#define BUTTON_A_PIN 22      // Button A connected to digital pin 2
+#define BUTTON_B_PIN 4      // Button B connected to digital pin 3
+#define NEOPIXEL_PIN 13      // NeoPixel strip connected to digital pin 6
 #define NUM_PIXELS 20       // Number of pixels in the strip
+
+#define DEBOUNCE_MS 10
 
 // Initialize NeoPixel strip
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -23,6 +25,8 @@ uint32_t GREEN = strip.Color(0, 255, 0);
 uint32_t BLUE = strip.Color(0, 0, 255);
 
 void setup() {
+
+  Serial.begin(115200);
   // Initialize buttons with internal pullup resistors
   pinMode(BUTTON_A_PIN, INPUT_PULLUP);
   pinMode(BUTTON_B_PIN, INPUT_PULLUP);
@@ -35,12 +39,18 @@ void loop() {
   // Read button states (buttons are active LOW due to pullup)
   bool buttonA = !digitalRead(BUTTON_A_PIN);
   bool buttonB = !digitalRead(BUTTON_B_PIN);
-  
+
   // Check for button press events (transition from HIGH to LOW)
-  if (buttonA && !buttonA_last) {
+  static unsigned long lastPressA = 0; // Last press time for button A
+  static unsigned long lastPressB = 0; // Last press time for button B
+  unsigned long currentTime = millis(); // Get current time
+
+  if (buttonA && !buttonA_last && (currentTime - lastPressA > DEBOUNCE_MS)) {
+    lastPressA = currentTime; // Update last press time for button A
     handlePlayerA();
   }
-  if (buttonB && !buttonB_last) {
+  if (buttonB && !buttonB_last && (currentTime - lastPressB > DEBOUNCE_MS)) {
+    lastPressB = currentTime; // Update last press time for button B
     handlePlayerB();
   }
   
@@ -66,6 +76,7 @@ void handlePlayerA() {
 }
 
 void handlePlayerB() {
+
   if (!gameActive) {
     gameActive = true;
   }

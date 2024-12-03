@@ -3,9 +3,9 @@
 #define BUTTON_A_PIN 22      // Button A connected to digital pin 2
 #define BUTTON_B_PIN 4      // Button B connected to digital pin 3
 #define NEOPIXEL_PIN 13      // NeoPixel strip connected to digital pin 6
-#define NUM_PIXELS 20       // Number of pixels in the strip
+#define NUM_PIXELS 10       // Number of pixels in the strip
 
-#define DEBOUNCE_MS 10
+#define DEBOUNCE_MS 20
 
 // Initialize NeoPixel strip
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -17,7 +17,13 @@ bool gameActive = false;
 
 // Button state variables
 bool buttonA_last = HIGH;
+bool buttonA_state;
+unsigned long lastPressA = HIGH; // Last press time for button A
+
 bool buttonB_last = HIGH;
+bool buttonB_state;
+unsigned long lastPressB = HIGH; // Last press time for button B
+
 
 // Colors
 uint32_t RED = strip.Color(255, 0, 0);
@@ -37,26 +43,38 @@ void setup() {
 
 void loop() {
   // Read button states (buttons are active LOW due to pullup)
-  bool buttonA = !digitalRead(BUTTON_A_PIN);
-  bool buttonB = !digitalRead(BUTTON_B_PIN);
-
-  // Check for button press events (transition from HIGH to LOW)
-  static unsigned long lastPressA = 0; // Last press time for button A
-  static unsigned long lastPressB = 0; // Last press time for button B
   unsigned long currentTime = millis(); // Get current time
+  bool readingbuttonA_state = !digitalRead(BUTTON_A_PIN);
+  bool readingbuttonB_state = !digitalRead(BUTTON_B_PIN);
+  // Check for button press events (transition from HIGH to LOW)
 
-  if (buttonA && !buttonA_last && (currentTime - lastPressA > DEBOUNCE_MS)) {
-    lastPressA = currentTime; // Update last press time for button A
-    handlePlayerA();
+  if(readingbuttonA_state != buttonA_last){
+    lastPressA = currentTime;
   }
-  if (buttonB && !buttonB_last && (currentTime - lastPressB > DEBOUNCE_MS)) {
-    lastPressB = currentTime; // Update last press time for button B
-    handlePlayerB();
+  if(readingbuttonB_state != buttonB_last){
+    lastPressB = currentTime;
   }
-  
-  // Update button states
-  buttonA_last = buttonA;
-  buttonB_last = buttonB;
+
+  if((currentTime - lastPressA) > DEBOUNCE_MS){
+    if(readingbuttonA_state != buttonA_state){
+      buttonA_state = readingbuttonA_state;
+      if(buttonA_state){
+        handlePlayerA();
+      }
+    }
+  }
+
+  if((currentTime - lastPressB) > DEBOUNCE_MS){
+    if(readingbuttonB_state != buttonB_state){
+      buttonB_state = readingbuttonB_state;
+      if(buttonB_state){
+        handlePlayerB();
+      }
+    }
+  }
+
+  buttonA_last = readingbuttonA_state;
+  buttonB_last= readingbuttonB_state;
 }
 
 void handlePlayerA() {

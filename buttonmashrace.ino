@@ -3,7 +3,7 @@
 #define BUTTON_A_PIN 22      // Button A connected to digital pin 2
 #define BUTTON_B_PIN 4      // Button B connected to digital pin 3
 #define NEOPIXEL_PIN 13      // NeoPixel strip connected to digital pin 6
-#define NUM_PIXELS 10       // Number of pixels in the strip
+#define NUM_PIXELS 20       // Number of pixels in the strip
 
 #define DEBOUNCE_MS 20
 

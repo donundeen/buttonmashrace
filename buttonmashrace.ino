@@ -13,7 +13,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_PIXELS, NEOPIXEL_PIN, NEO_GRB + 
 // Game state variables
 int playerA_position = 0;    // Number of green lights from top
 int playerB_position = 0;    // Number of blue lights from bottom
-bool gameActive = false;
+bool gameActive = true;
 
 // Button state variables
 bool buttonA_last = HIGH;
@@ -79,7 +79,7 @@ void loop() {
 
 void handlePlayerA() {
   if (!gameActive) {
-    gameActive = true;
+    return;
   }
   
   int nextPosition = NUM_PIXELS - 1 - playerA_position;
@@ -96,7 +96,7 @@ void handlePlayerA() {
 void handlePlayerB() {
 
   if (!gameActive) {
-    gameActive = true;
+   return;
   }
   
   int nextPosition = playerB_position;
@@ -140,11 +140,11 @@ void checkWinner() {
 }
 
 void flashLights(uint32_t color) {
-  for (int i = 0; i < 10; i++) {
-    strip.fill(color); // Set all lights to the winning color
+  for (int i = 0; i < 20; i++) {
+    strip.fill(RED); // Set all lights to the winning color
     strip.show();
     delay(100); // Wait for 100 milliseconds
-    strip.fill(RED); // Reset to red
+    strip.fill(color); // Reset to red
     strip.show();
     delay(100); // Wait for 100 milliseconds
   }
@@ -156,19 +156,19 @@ void resetGame() {
   buttonB_last = HIGH; // Simulate button not pressed
 
   // Turn lights red one at a time, starting from the light furthest from the winner
-  int startPosition = (playerA_position >= NUM_PIXELS) ? 0 : NUM_PIXELS - 1; // Start from the furthest light
-  int endPosition = (playerA_position >= NUM_PIXELS) ? NUM_PIXELS : NUM_PIXELS - playerA_position; // End position based on winner
-
-  for (int i = startPosition; i < endPosition; i++) {
-    strip.setPixelColor(i, RED); // Set the light to red
+ 
+  int mid = floor(NUM_PIXELS / 2);
+  for (int i = 0; i < mid; i++) {
+    strip.setPixelColor(mid + i, RED); // Set the light to red
+    strip.setPixelColor(mid - i - 1, RED); // Set the light to red
     strip.show();
-    delay(200); // Delay to create a slow transition effect
+    delay(300); // Delay to create a slow transition effect
   }
 
   // Reset player positions and game state
   playerA_position = 0;
   playerB_position = 0;
-  gameActive = false;
+  gameActive = true;
 
   // Reactivate buttons
   buttonA_last = HIGH; // Reset button state
